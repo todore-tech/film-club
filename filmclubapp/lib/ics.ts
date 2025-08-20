@@ -1,29 +1,10 @@
+type IcsArgs = { title: string; description?: string; startsAt: string; durationMinutes?: number; location?: string; url?: string; };
 
-type IcsArgs = {
-  title: string;
-  description?: string;
-  startsAt: string;           // ISO string, e.g. "2025-09-01T17:00:00Z"
-  durationMinutes?: number;   // default 60
-  location?: string;          // e.g. "Zoom"
-  url?: string;               // meeting page
-};
-
-export function buildMeetingICS({
-  title,
-  description,
-  startsAt,
-  durationMinutes = 60,
-  location = "Zoom",
-  url,
-}: IcsArgs) {
+export function buildMeetingICS({ title, description, startsAt, durationMinutes = 60, location = "Zoom", url }: IcsArgs) {
   const start = new Date(startsAt);
   const end = new Date(start.getTime() + durationMinutes * 60000);
-
-  const fmt = (d: Date) =>
-    d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-
-  const uid = `${crypto.randomUUID()}@filmclub`;
-
+  const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  const uid = `${(globalThis as any).crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)}@filmclub`;
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -43,15 +24,9 @@ export function buildMeetingICS({
     "END:VCALENDAR",
     "",
   ].filter(Boolean);
-
-  // ICS requires CRLF line endings
   return lines.join("\r\n");
 }
 
 function icsEscape(s: string) {
-  return s
-    .replace(/\\/g, "\\\\")
-    .replace(/\r?\n/g, "\\n")
-    .replace(/,/g, "\\,")
-    .replace(/;/g, "\\;");
+  return s.replace(/\\/g, "\\\\").replace(/\r?\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
 }
