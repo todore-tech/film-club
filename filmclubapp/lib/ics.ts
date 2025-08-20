@@ -1,5 +1,3 @@
-// lib/ics.ts
-// Simple ICS builder without external uuid package
 
 type IcsArgs = {
   title: string;
