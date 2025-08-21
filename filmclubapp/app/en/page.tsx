@@ -18,16 +18,19 @@ export default function Page() {
           title="Youth 15–17"
           description="Joint voting, adult moderator, parental consent"
           age="15-17"
+          ctaLabel="Join"
         />
         <ClubCard
           title="20–40"
           description="Pleasant meeting after work, 60–75 minutes"
           age="20-40"
+          ctaLabel="Join"
         />
         <ClubCard
           title="55+"
           description="Classics and current affairs, brief technical assistance"
           age="55+"
+          ctaLabel="Join"
         />
       </div>
       <Link href="/dashboard" className="underline text-sm">
