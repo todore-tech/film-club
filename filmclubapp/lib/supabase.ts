@@ -1,32 +1,19 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+// lib/supabase.ts
+import { createClient } from '@supabase/supabase-js'
 
-/*
- * This module exports both a browser‑side client (using the public anon key) and
- * a helper to create a service role client (for server routes). The anon client
- * persists sessions automatically in local storage; the server client should
- * never be used on the client because it can bypass RLS.
- */
+// IMPORTANT: do NOT throw at import time.
+// During Vercel build these may be empty; at runtime they exist.
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// Public client (safe for browser & server)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Browser/client side client. Uses the anon key and persists session.
-export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-  },
-});
-
-/**
- * Create a Supabase client using the service role key. Only safe on the server.
- * Throws if SUPABASE_SERVICE_ROLE_KEY is not defined.
- */
-export function createAdminClient(): SupabaseClient {
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!serviceKey) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY must be set to use createAdminClient');
+// Admin client (server-only; use inside API routes/actions)
+export function createAdminClient() {
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Missing SUPABASE env vars for admin client.')
   }
-  return createClient(supabaseUrl, serviceKey);
+  return createClient(supabaseUrl, serviceRoleKey)
 }
