@@ -4,6 +4,16 @@ import { ALLOWED_AGE_GROUPS, isAgeGroup } from '@/lib/ageGroups';
 
 export const dynamic = 'force-dynamic'
 
+function isAuthorized(req: NextRequest): boolean {
+  const adminToken = process.env.ADMIN_TOKEN || ''
+  if (!adminToken) return false
+  const x = req.headers.get('x-admin-token') || ''
+  if (x && x === adminToken) return true
+  const auth = req.headers.get('authorization') || req.headers.get('Authorization') || ''
+  if (auth.startsWith('Bearer ') && auth.slice(7) === adminToken) return true
+  return false
+}
+
 /**
  * GET /api/meetings
  * Returns an array of meetings ordered by starts_at_tz. Supports ?age_group=.
@@ -43,9 +53,7 @@ export async function GET(request: NextRequest) {
  * Body: { film_title, starts_at_tz, timezone, url, age_group }
  */
 export async function POST(request: NextRequest) {
-  const token = request.headers.get('x-admin-token') || '';
-  const adminToken = process.env.ADMIN_TOKEN || '';
-  if (!adminToken || token !== adminToken) {
+  if (!isAuthorized(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const body = await request.json().catch(() => ({}));
@@ -70,9 +78,7 @@ export async function POST(request: NextRequest) {
  * DELETE /api/meetings?id=<id> (admin only)
  */
 export async function DELETE(request: NextRequest) {
-  const token = request.headers.get('x-admin-token') || '';
-  const adminToken = process.env.ADMIN_TOKEN || '';
-  if (!adminToken || token !== adminToken) {
+  if (!isAuthorized(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const url = new URL(request.url);
