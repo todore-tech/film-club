@@ -20,8 +20,13 @@ export default function AdminPage() {
   });
 
   useEffect(() => {
-    const stored = localStorage.getItem('admin_token');
-    if (stored) setToken(stored);
+    const envToken = process.env.NEXT_PUBLIC_ADMIN_TOKEN || process.env.ADMIN_TOKEN;
+    if (envToken) {
+      setToken(envToken);
+    } else {
+      const stored = localStorage.getItem('admin_token');
+      if (stored) setToken(stored);
+    }
   }, []);
 
   useEffect(() => {
