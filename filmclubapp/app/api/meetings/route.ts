@@ -32,9 +32,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const auth = request.headers.get('authorization') || request.headers.get('Authorization');
-  const adminToken = process.env.ADMIN_TOKEN;
-  if (!auth || !adminToken || auth !== `Bearer ${adminToken}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const adminToken = process.env.ADMIN_TOKEN || process.env.NEXT_PUBLIC_ADMIN_TOKEN;
+  if (!adminToken) {
+    return NextResponse.json({ error: 'Server misconfigured: ADMIN_TOKEN not set' }, { status: 500 });
+  }
+  if (!auth) {
+    return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 });
+  }
+  if (auth !== `Bearer ${adminToken}`) {
+    return NextResponse.json({ error: 'Invalid admin token' }, { status: 403 });
   }
   const body = await request.json();
   const { club_id, film_id, starts_at, capacity = 100, zoom_url, agenda } = body;
