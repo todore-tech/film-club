@@ -17,7 +17,7 @@ export default function AdminPage() {
     time: '',
     timezone: 'Asia/Jerusalem',
     url: '',
-    age_group: '18-29',
+    age_group: '20-40',
   });
 
   useEffect(() => {
@@ -78,7 +78,7 @@ export default function AdminPage() {
       return alert(data.error || 'Failed to create meeting');
     }
     setShowCreate(false);
-    setForm({ film_title: '', date: '', time: '', timezone: 'Asia/Jerusalem', url: '', age_group: '18-29' });
+    setForm({ film_title: '', date: '', time: '', timezone: 'Asia/Jerusalem', url: '', age_group: '20-40' });
     fetchMeetings();
   }
 
@@ -93,7 +93,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <div dir="rtl" className="flex flex-col gap-6 max-w-2xl text-right">
       <h1 className="text-2xl font-bold">Admin</h1>
       {!authed && (
         <div className="flex flex-col gap-2">
@@ -149,12 +149,9 @@ export default function AdminPage() {
               <label className="flex flex-col gap-1">
                 <span>Age Group</span>
                 <select name="age_group" value={form.age_group} onChange={handleChange} className="border rounded px-3 py-2">
-                  <option value="7-10">7-10</option>
-                  <option value="11-14">11-14</option>
                   <option value="15-17">15-17</option>
-                  <option value="18-29">18-29</option>
-                  <option value="30-60">30-60</option>
-                  <option value="60+">60+</option>
+                  <option value="20-40">20-40</option>
+                  <option value="55+">55+</option>
                 </select>
               </label>
               <button type="submit" className="px-4 py-2 rounded bg-black text-white w-max">Create</button>
@@ -167,7 +164,10 @@ export default function AdminPage() {
                 <li key={m.id} className="p-3 flex items-center justify-between gap-3">
                   <div className="flex flex-col text-sm">
                     <span className="font-semibold">{m.film_title}</span>
-                    <span className="opacity-70">{m.starts_at_tz} · {m.age_group}</span>
+                    <span className="opacity-70">
+                      {new Intl.DateTimeFormat('he-IL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:false }).format(new Date(m.starts_at_tz))}
+                      {` · ${m.age_group ?? ''}`}
+                    </span>
                     {m.url && (
                       <a className="underline" href={m.url} target="_blank">Link</a>
                     )}

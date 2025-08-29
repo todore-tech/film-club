@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { ALLOWED_AGE_GROUPS } from '@/lib/ageGroups';
 
 type Meeting = {
   id: string;
@@ -11,10 +12,8 @@ type Meeting = {
   age_group: string;
 };
 
-const AGE_GROUPS = ['7-10', '11-14', '15-17', '18-29', '30-60', '60+'] as const;
-
 export default function Page() {
-  const [ageGroup, setAgeGroup] = useState<string>('18-29');
+  const [ageGroup, setAgeGroup] = useState<string>('20-40');
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -51,7 +50,7 @@ export default function Page() {
           onChange={(e) => setAgeGroup(e.target.value)}
           className="border rounded px-3 py-2"
         >
-          {AGE_GROUPS.map((g) => (
+          {ALLOWED_AGE_GROUPS.map((g) => (
             <option key={g} value={g}>{g}</option>
           ))}
         </select>
