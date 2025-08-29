@@ -1,62 +1,67 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { createAdminClient } from '@/lib/supabase';
+import { createAdminClient, supabase as anon } from '@/lib/supabase';
 
 /**
  * GET /api/meetings
- * Optionally accepts `club_id` as a search parameter to filter meetings for a
- * specific club. Returns an array of meetings with minimal film metadata.
- *
- * POST /api/meetings (admin only)
- * Creates a new meeting. Requires an Authorization header with the value
- * `Bearer ${process.env.ADMIN_TOKEN}`. The request body should include
- * club_id, film_id, starts_at (ISO timestamp), capacity, zoom_url and
- * agenda. This endpoint uses the service role key via createAdminClient.
+ * Returns an array of meetings ordered by starts_at_tz. Supports ?age_group=.
+ * Always returns an array, even on errors (then it returns []).
  */
 export async function GET(request: NextRequest) {
-  const url = new URL(request.url);
-  const clubId = url.searchParams.get('club_id');
-  const supabase = createAdminClient();
-  let query = supabase
-    .from('meetings')
-    .select('id, club_id, starts_at_tz, status, films:film_id (title)')
-    .order('starts_at_tz', { ascending: true });
-  if (clubId) {
-    query = query.eq('club_id', clubId);
+  try {
+    const url = new URL(request.url);
+    const ageGroup = url.searchParams.get('age_group');
+    let query = anon
+      .from('meetings')
+      .select('id, film_title, starts_at_tz, timezone, url, age_group')
+      .order('starts_at_tz', { ascending: true });
+    if (ageGroup) query = query.eq('age_group', ageGroup);
+    const { data, error } = await query;
+    if (error) return NextResponse.json([]);
+    return NextResponse.json(Array.isArray(data) ? data : []);
+  } catch {
+    return NextResponse.json([]);
   }
-  const { data, error } = await query;
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-  return NextResponse.json(data);
 }
 
+/**
+ * POST /api/meetings (admin only)
+ * Body: { film_title, starts_at_tz, timezone, url, age_group }
+ */
 export async function POST(request: NextRequest) {
-  const auth = request.headers.get('authorization') || request.headers.get('Authorization');
-  const adminToken = process.env.ADMIN_TOKEN;
-  if (!auth || !adminToken || auth !== `Bearer ${adminToken}`) {
+  const token = request.headers.get('x-admin-token') || '';
+  const adminToken = process.env.ADMIN_TOKEN || '';
+  if (!adminToken || token !== adminToken) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const body = await request.json();
-  const { club_id, film_id, starts_at, capacity = 100, zoom_url, agenda } = body;
-  if (!club_id || !film_id || !starts_at) {
+  const body = await request.json().catch(() => ({}));
+  const { film_title, starts_at_tz, timezone, url, age_group } = body || {};
+  if (!film_title || !starts_at_tz || !timezone || !age_group) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
-  const supabase = createAdminClient();
-  const { data, error } = await supabase
+  const admin = createAdminClient();
+  const { data, error } = await admin
     .from('meetings')
-    .insert({
-      club_id,
-      film_id,
-      starts_at_tz: starts_at,
-      capacity,
-      zoom_url,
-      agenda,
-      status: 'announced',
-    })
+    .insert({ film_title, starts_at_tz, timezone, url, age_group })
     .select()
     .single();
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data, { status: 201 });
+}
+
+/**
+ * DELETE /api/meetings?id=<id> (admin only)
+ */
+export async function DELETE(request: NextRequest) {
+  const token = request.headers.get('x-admin-token') || '';
+  const adminToken = process.env.ADMIN_TOKEN || '';
+  if (!adminToken || token !== adminToken) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const url = new URL(request.url);
+  const id = url.searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+  const admin = createAdminClient();
+  const { error } = await admin.from('meetings').delete().eq('id', id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ ok: true });
 }
