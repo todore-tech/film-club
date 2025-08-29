@@ -2,8 +2,5 @@
   "version": 2,
   "builds": [
     { "src": "filmclubapp/next.config.js", "use": "@vercel/next" }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "filmclubapp/$1" }
   ]
 }
