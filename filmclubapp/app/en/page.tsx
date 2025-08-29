@@ -8,6 +8,7 @@ import Link from 'next/link';
 export default function Page() {
   return (
     <div className="flex flex-col gap-6">
+      <h1 className="text-xl font-bold text-green-700">Codex Connected</h1>
       <h1 className="text-3xl font-extrabold">Film Club — Vote, Watch, Discuss</h1>
       <p className="opacity-80">
         Choose your age group, sign up, and receive reminders for the upcoming Zoom meeting. We choose the
