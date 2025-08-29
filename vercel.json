@@ -1,10 +1,9 @@
 {
   "version": 2,
   "builds": [
-    { "src": "filmclubapp/package.json", "use": "@vercel/next" }
+    { "src": "filmclubapp/next.config.js", "use": "@vercel/next" }
   ],
   "routes": [
     { "src": "/(.*)", "dest": "filmclubapp/$1" }
   ]
 }
-
