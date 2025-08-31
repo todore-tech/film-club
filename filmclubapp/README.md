@@ -54,18 +54,25 @@ your own machine after cloning.
      your Supabase project settings.
    * `SUPABASE_SERVICE_ROLE_KEY` from the *Project API keys* page (used
      on the server only – keep this secret).
+   * `NEXT_PUBLIC_SITE_URL` – base URL of your site (for OAuth/magic link redirects), e.g. `http://localhost:3000` in dev, `https://film-club-two.vercel.app` in production.
    * `RESEND_API_KEY` from your Resend account (or replace with
      SendGrid if preferred).
    * `ADMIN_TOKEN` – an arbitrary string used to protect the admin page.
 
-5. **Run the development server.**
+5. **Set auth redirect URLs.** In Supabase Dashboard → Authentication → URL Configuration:
+   * Site URL: `http://localhost:3000`
+   * Additional Redirect URLs: `http://localhost:3000/login`, `https://film-club-two.vercel.app/login`
+
+   If using Google OAuth, also add the same redirect URLs in your Google OAuth client configuration.
+
+6. **Run the development server.**
    ```bash
    npm run dev
    ```
    Visit [http://localhost:3000](http://localhost:3000) to view the
    application. Use `/login` to sign in with email or Google.
 
-6. **Admin dashboard.** Navigate to `/admin`, enter the `ADMIN_TOKEN`
+7. **Admin dashboard.** Navigate to `/admin`, enter the `ADMIN_TOKEN`
    you set in your `.env.local` file and create new meetings.
 
 ## Email notifications

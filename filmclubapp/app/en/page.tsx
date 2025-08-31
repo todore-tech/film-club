@@ -1,41 +1,77 @@
-import ClubCard from '../../components/ClubCard';
+"use client";
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { ALLOWED_AGE_GROUPS } from '@/lib/ageGroups';
 
-/**
- * English landing page for the film club.
- * Presents the three age groups in English and invites the user to join.
- */
+type Meeting = {
+  id: string;
+  film_title: string;
+  starts_at_tz: string;
+  timezone?: string | null;
+  url?: string | null;
+  age_group: string;
+};
+
 export default function Page() {
+  const [ageGroup, setAgeGroup] = useState<string>('20-40');
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  async function load() {
+    setLoading(true);
+    try {
+      const url = `/api/meetings?age_group=${encodeURIComponent(ageGroup)}`;
+      const res = await fetch(url, { cache: 'no-store' });
+      const data = await res.json();
+      setMeetings(Array.isArray(data) ? data : []);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ageGroup]);
+
+  const subtitle = useMemo(
+    () => `Showing meetings for age group: ${ageGroup}`,
+    [ageGroup]
+  );
+
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-3xl font-extrabold">Film Club — Vote, Watch, Discuss</h1>
-      <p className="opacity-80">
-        Choose your age group, sign up, and receive reminders for the upcoming Zoom meeting. We choose the
-        film together, watch at home, and meet for an educational and enjoyable discussion.
-      </p>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <ClubCard
-          title="Youth 15–17"
-          description="Joint voting, adult moderator, parental consent"
-          age="15-17"
-          ctaLabel="Join"
-        />
-        <ClubCard
-          title="20–40"
-          description="Pleasant meeting after work, 60–75 minutes"
-          age="20-40"
-          ctaLabel="Join"
-        />
-        <ClubCard
-          title="55+"
-          description="Classics and current affairs, brief technical assistance"
-          age="55+"
-          ctaLabel="Join"
-        />
+      <p className="opacity-80">{subtitle}</p>
+      <label className="flex items-center gap-2">
+        <span>Age group</span>
+        <select
+          value={ageGroup}
+          onChange={(e) => setAgeGroup(e.target.value)}
+          className="border rounded px-3 py-2"
+        >
+          {ALLOWED_AGE_GROUPS.map((g) => (
+            <option key={g} value={g}>{g}</option>
+          ))}
+        </select>
+      </label>
+      <div className="flex flex-col gap-2">
+        {loading && <div>Loading…</div>}
+        {!loading && meetings.length === 0 && (
+          <div className="opacity-70">No meetings for this group yet.</div>
+        )}
+        <ul className="divide-y rounded-xl bg-white shadow">
+          {meetings.map((m) => (
+            <li key={m.id} className="p-3 flex items-center justify-between gap-3">
+              <div className="flex flex-col text-sm">
+                <span className="font-semibold">{m.film_title}</span>
+                <span className="opacity-70">{m.starts_at_tz}</span>
+              </div>
+              <Link href={`/meetings/${m.id}`} className="px-3 py-1.5 rounded border">RSVP</Link>
+            </li>
+          ))}
+        </ul>
       </div>
-      <Link href="/dashboard" className="underline text-sm">
-        Already registered? Go to dashboard »
-      </Link>
     </div>
   );
 }

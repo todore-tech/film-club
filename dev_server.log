@@ -1,0 +1,11 @@
+
+> filmclub@1.0.0 dev
+> next dev --port 3000
+
+  ▲ Next.js 14.2.0
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1724ms
+[?25h

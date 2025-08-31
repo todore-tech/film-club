@@ -1,0 +1,13 @@
+{
+  "name": "film-club-monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix filmclubapp install --no-audit --no-fund && npm --prefix filmclubapp run dev",
+    "build": "npm --prefix filmclubapp install --no-audit --no-fund && npm --prefix filmclubapp run build",
+    "start": "npm --prefix filmclubapp run start",
+    "dev:thefilmclub": "npm --prefix TheFilmClub install --no-audit --no-fund && npm --prefix TheFilmClub run dev",
+    "build:thefilmclub": "npm --prefix TheFilmClub install --no-audit --no-fund && npm --prefix TheFilmClub run build",
+    "start:thefilmclub": "npm --prefix TheFilmClub run start"
+  }
+}
+
