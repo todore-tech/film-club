@@ -1,6 +1,6 @@
 "use client";
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getClient } from '@/lib/supabase';
 
 interface Option {
   id: string;
@@ -24,6 +24,7 @@ export default function VoteClient({ poll }: { poll: Poll }) {
 
   async function vote(optionId: string) {
     setLoading(true);
+    const supabase = getClient();
     const {
       data: { session },
     } = await supabase.auth.getSession();

@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { createAdminClient, supabase as anon } from '@/lib/supabase';
+import { createAdminClient, getClient } from '@/lib/supabase';
 import { ALLOWED_AGE_GROUPS, isAgeGroup } from '@/lib/ageGroups';
 
 export const dynamic = 'force-dynamic'
@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
     const ageGroup = url.searchParams.get('age_group');
     const filterAge = isAgeGroup(ageGroup) ? ageGroup : null;
 
+    const anon = getClient();
     let query = anon
       .from('meetings')
       .select('id, film_title, starts_at_tz, timezone, url, age_group')

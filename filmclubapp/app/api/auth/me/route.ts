@@ -2,7 +2,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getClient } from '@/lib/supabase'
 
 // Returns the current user if a Bearer token is sent (or just { user: null }).
 export async function GET(req: NextRequest) {
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
 
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.slice(7)
-      const { data, error } = await supabase.auth.getUser(token)
+      const { data, error } = await getClient().auth.getUser(token)
       if (!error) user = data.user
     }
 

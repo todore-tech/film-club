@@ -1,7 +1,7 @@
 "use client";
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getClient } from '@/lib/supabase';
 
 /**
  * Welcome page. Shows Sign Up / Log In for guests,
@@ -12,13 +12,14 @@ export default function Page() {
 
   useEffect(() => {
     const init = async () => {
+      const supabase = getClient();
       const {
         data: { session },
       } = await supabase.auth.getSession();
       setLoggedIn(!!session);
     };
     init();
-    const { data } = supabase.auth.onAuthStateChange((_evt, session) => {
+    const { data } = getClient().auth.onAuthStateChange((_evt, session) => {
       setLoggedIn(!!session);
     });
     return () => data.subscription.unsubscribe();

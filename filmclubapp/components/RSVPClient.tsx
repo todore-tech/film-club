@@ -1,6 +1,6 @@
 "use client";
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getClient } from '@/lib/supabase';
 
 /**
  * Authenticated RSVP component. Pulls the user's access token from Supabase
@@ -13,6 +13,7 @@ export default function RSVPClient({ meetingId, initialStatus }: { meetingId: st
 
   async function send(status: 'yes' | 'maybe' | 'no') {
     setLoading(true);
+    const supabase = getClient();
     const {
       data: { session },
     } = await supabase.auth.getSession();

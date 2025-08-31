@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { getClient } from '../lib/supabase';
 import Link from 'next/link';
 
 export default function AuthWidget() {
@@ -9,6 +9,7 @@ export default function AuthWidget() {
 
   useEffect(() => {
     const load = async () => {
+      const supabase = getClient();
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -18,7 +19,7 @@ export default function AuthWidget() {
     load();
     const {
       data: listener,
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = getClient().auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
     return () => {
@@ -27,7 +28,7 @@ export default function AuthWidget() {
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await getClient().auth.signOut();
   };
 
   if (loading) return null;

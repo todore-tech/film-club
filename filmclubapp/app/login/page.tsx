@@ -1,6 +1,6 @@
 "use client";
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getClient } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 /**
@@ -21,14 +21,14 @@ function LoginInner() {
 
   // On auth change, if a pending profile exists from signup, upsert it.
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange(async (_evt, session) => {
+    const { data } = getClient().auth.onAuthStateChange(async (_evt, session) => {
       if (!session) return;
       try {
         const pending = localStorage.getItem('pending_profile');
         if (pending) {
           const parsed = JSON.parse(pending);
           localStorage.removeItem('pending_profile');
-          await supabase.from('profiles').upsert({
+          await getClient().from('profiles').upsert({
             user_id: session.user.id,
             full_name: parsed.full_name,
             age_group: parsed.age_group,
@@ -58,7 +58,7 @@ function LoginInner() {
       }
 
       const redirect = `${process.env.NEXT_PUBLIC_SITE_URL}/login`;
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await getClient().auth.signInWithOtp({
         email,
         options: { emailRedirectTo: redirect },
       });
@@ -69,7 +69,7 @@ function LoginInner() {
   );
 
   async function signInWithGoogle() {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error } = await getClient().auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/en` },
     });

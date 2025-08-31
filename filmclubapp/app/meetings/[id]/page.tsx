@@ -1,4 +1,4 @@
-import { supabase } from '../../../lib/supabase';
+import { getClient } from '../../../lib/supabase';
 import RSVPClient from '../../../components/RSVPClient';
 import { notFound } from 'next/navigation';
 
@@ -15,6 +15,7 @@ export default async function MeetingPage({ params }: { params: { id: string } }
   // following call will fail silently and we fall back to a demo meeting.
   let meeting: any = null;
   try {
+    const supabase = getClient();
     const { data, error } = await supabase
       .from('meetings')
       .select(

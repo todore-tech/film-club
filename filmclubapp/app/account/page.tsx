@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getClient } from '@/lib/supabase';
 
 type Profile = {
   full_name: string | null;
@@ -24,6 +24,7 @@ export default function AccountPage() {
   useEffect(() => {
     let mounted = true;
     (async () => {
+      const supabase = getClient();
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -54,7 +55,7 @@ export default function AccountPage() {
 
   async function updateRsvp(id: string, status: 'yes' | 'maybe' | 'no') {
     setRsvps((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
-    await supabase.from('rsvps').update({ status }).eq('id', id);
+    await getClient().from('rsvps').update({ status }).eq('id', id);
   }
 
   if (loading) return null;
@@ -96,4 +97,3 @@ export default function AccountPage() {
     </div>
   );
 }
-
