@@ -6,6 +6,16 @@ const ALLOWED_ORIGINS = new Set([
   'https://film-club-two.vercel.app',
 ])
 
+function hasValidAdminToken(request: Request) {
+  const adminToken = process.env.ADMIN_TOKEN || ''
+  if (!adminToken) return false
+  const x = request.headers.get('x-admin-token') || ''
+  if (x && x === adminToken) return true
+  const auth = request.headers.get('authorization') || request.headers.get('Authorization') || ''
+  if (auth.startsWith('Bearer ') && auth.slice(7) === adminToken) return true
+  return false
+}
+
 export function middleware(request: Request) {
   const { method } = request
   const origin = request.headers.get('origin') || ''
@@ -14,6 +24,13 @@ export function middleware(request: Request) {
   const url = new URL(request.url)
   if (!url.pathname.startsWith('/api')) {
     return NextResponse.next()
+  }
+
+  // Protect sensitive preview endpoint with ADMIN_TOKEN
+  if (url.pathname.startsWith('/api/notifications/preview')) {
+    if (!hasValidAdminToken(request)) {
+      return new Response('Unauthorized', { status: 401 })
+    }
   }
 
   // Reflect allowed origin, otherwise no CORS headers
@@ -46,4 +63,3 @@ export function middleware(request: Request) {
 export const config = {
   matcher: ['/api/:path*'],
 }
-
